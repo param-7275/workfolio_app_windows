@@ -131,7 +131,7 @@ while True:
     # Check if we should take a screenshot
     if should_be_active():
         # Take a screenshot immediately if this is the first time or interval has passed
-        if last_screenshot_time == 0 or (now - last_screenshot_time >= 60):
+        if last_screenshot_time == 0 or (now - last_screenshot_time >= 480):
             take_screenshot()
             last_screenshot_time = now
     
