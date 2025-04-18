@@ -15,7 +15,7 @@ import mss
 import mss.tools
 # Get user_id from command line arguments
 user_id = sys.argv[1] if len(sys.argv) > 1 else "unknown"
- 
+interval = int(sys.argv[2]) if len(sys.argv) > 2 else 300
 # Configure screenshot directory with more efficient path
 SCREENSHOT_DIR = os.path.join("public", "screenshots", f"user_{user_id}")
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
@@ -63,7 +63,6 @@ def take_screenshot():
     return file_path
 
 def notify_rails(file_path, timestamp):
-    print('---------------------------------------------------------------------------------------------------')
     url = "http://localhost:3000/screenshots/create_from_python"
     data = {
         "user_id": user_id,
@@ -131,7 +130,7 @@ while True:
     # Check if we should take a screenshot
     if should_be_active():
         # Take a screenshot immediately if this is the first time or interval has passed
-        if last_screenshot_time == 0 or (now - last_screenshot_time >= 480):
+        if last_screenshot_time == 0 or (now - last_screenshot_time >= interval):
             take_screenshot()
             last_screenshot_time = now
     

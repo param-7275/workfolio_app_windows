@@ -8,3 +8,4 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 AdminUser.create!(email: 'workfolio@demo.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+ScreenshotSetting.find_or_create_by(interval: 300) if Rails.env.development? && ScreenshotSetting.count == 0

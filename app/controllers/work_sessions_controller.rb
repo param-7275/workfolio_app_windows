@@ -20,7 +20,8 @@ class WorkSessionsController < ApplicationController
     
     # Take an immediate screenshot
     take_immediate_screenshot(current_user.id)
-    run_window_tracker_and_save(@work_session.id)
+    run_window_tracking_script(current_user.id)
+    # run_window_tracker_and_save(@work_session.id)
     redirect_to work_session_index_path
   end
   
@@ -44,6 +45,7 @@ class WorkSessionsController < ApplicationController
       @work_session.update(break_end: Time.current)
       flash[:notice] = "Break ended!"
       resume_screenshot_capture(current_user.id)
+      # run_window_tracking_script(current_user.id)
     else
       flash[:alert] = "You need to start a break first."
     end
@@ -102,13 +104,11 @@ class WorkSessionsController < ApplicationController
   def start_screenshot_capture(user_id)
     # Kill any existing process first to avoid duplicates
     stop_screenshot_capture(user_id)
-    
+    interval = ScreenshotSetting.last.interval
     # Start a new process
-    # C:\Users\Dell\Downloads\workfolio_copy\workfolio_copy\script\screenshot_uploader.py
-    # script_path = "/home/khushi/Rails/workfolio_copy/script/screenshot_uploader.py"
     script_path = "C:/Users/Dell/Downloads/workfolio_copy/workfolio_copy/script/screenshot_uploader.py"
 
-    pid = spawn("python3 #{script_path} #{user_id}")
+    pid = spawn("python3 #{script_path} #{user_id} #{interval}")
     Process.detach(pid)
     
     # Create status file indicating active status
@@ -186,6 +186,14 @@ class WorkSessionsController < ApplicationController
       start_screenshot_capture(user_id)
     end
   end
+
+  def run_window_tracking_script(user_id, duration_in_minutes = 5)
+    python_script_path = Rails.root.join('lib', 'tracking', 'track_windows.py')
+    output_path = Rails.root.join('tmp', "window_tracking_output_#{user_id}.json")
+  
+    system("python #{python_script_path} #{duration_in_minutes} #{output_path}")
+  end
+  
   
   def stop_screenshot_capture(user_id)
     status_file = File.join(Dir.tmpdir, "screenshot_status_#{user_id}.json")
